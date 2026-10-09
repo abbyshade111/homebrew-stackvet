@@ -19,7 +19,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: Homebrew/actions/setup-homebrew@main
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Use this checkout as the tap
         run: |
           tap="$(brew --repository)/Library/Taps/abbyshade111/homebrew-stackvet"
