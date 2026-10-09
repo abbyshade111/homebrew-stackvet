@@ -1,0 +1,32 @@
+# Installs the formula from source on a Mac and on Linux and runs its test, as a person would.
+# Run on every push and pull request, by hand, and weekly, since a head-only formula builds
+# whatever StackVet's main is that day.
+name: test
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "37 6 * * 1"
+permissions:
+  contents: read
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: Homebrew/actions/setup-homebrew@master
+      - uses: actions/checkout@v4
+      - name: Use this checkout as the tap
+        run: |
+          tap="$(brew --repository)/Library/Taps/abbyshade111/homebrew-stackvet"
+          mkdir -p "$(dirname "$tap")"
+          rm -rf "$tap"
+          ln -s "$GITHUB_WORKSPACE" "$tap"
+      - run: brew audit abbyshade111/stackvet/sv
+      - run: brew install --HEAD --verbose abbyshade111/stackvet/sv
+      - run: brew test abbyshade111/stackvet/sv
+      - run: sv --version
