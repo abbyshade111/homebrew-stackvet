@@ -4,7 +4,9 @@
 OWASP security standards, and says plainly what it checked and what it did not.
 
 This repository lets Homebrew install `sv` on a Mac or on Linux. Homebrew builds it on your own computer and
-fetches what the build needs by itself; the first install takes a few minutes.
+fetches what the build needs by itself. The first install compiles all of StackVet, so it takes a while (longer on an
+older or busier computer), and it needs several gigabytes of free disk space while it builds. If your Mac says it has
+run out of application memory, free some disk space first: macOS uses free disk as extra memory.
 
 ```bash
 brew install --HEAD abbyshade111/stackvet/sv
