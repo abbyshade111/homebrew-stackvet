@@ -16,7 +16,11 @@ class Sv < Formula
 
   def install
     # --locked: the versions in Cargo.lock, the ones StackVet's tests ran with.
-    system "cargo", "build", "--release", "--locked", "-p", "sv-cli"
+    # --jobs 2: two crates compiled at a time rather than one per core. The build includes sixteen
+    # tree-sitter grammars written in C, and compiling them all at once took more memory than a Mac with
+    # little free disk could swap to: on 9 October 2026 the owner's Mac ran out of application memory
+    # partway through the first install. Slower, and it finishes.
+    system "cargo", "build", "--release", "--locked", "--jobs", "2", "-p", "sv-cli"
     libexec.install "target/release/sv"
     libexec.install "data"
     bin.install_symlink libexec/"sv"
