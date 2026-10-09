@@ -30,3 +30,13 @@ jobs:
       - run: brew install --HEAD --verbose abbyshade111/stackvet/sv
       - run: brew test abbyshade111/stackvet/sv
       - run: sv --version
+      # On 9 October 2026 one Linux run stopped with Homebrew's "Empty installation" and the rerun of the
+      # same commit passed; the log could not be read where it was looked at. If it comes back, this shows
+      # what was installed, where Homebrew built, and how it is set up.
+      - name: What was installed, when anything failed
+        if: failure()
+        run: |
+          brew config || true
+          ls -laR "$(brew --cellar)/sv" 2>&1 | head -50 || true
+          ls -la "$(brew --prefix)/bin/sv" 2>&1 || true
+          df -h || true
