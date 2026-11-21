@@ -23,4 +23,5 @@ To update later: `brew upgrade sv` for the next release, or `brew upgrade --fetc
 `abbyshade111/scoop-stack-vet` (see StackVet's `docs/GETTING-STARTED.md`), or use StackVet's Docker image.
 
 The checks in `.github/workflows/test.yml` install `sv` both ways, the release and `--HEAD`, on a Mac and on Linux and run a real
-check with it, on every change here and once a week.
+check with it, on every change here and once a week. Each of those four jobs first checks that `main`'s rules require it by
+its name, so a job renamed, or a system added to the matrix, fails until the ruleset requires it too.
