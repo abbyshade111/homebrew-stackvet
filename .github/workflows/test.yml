@@ -1,5 +1,6 @@
-# Installs the formula from source on a Mac and on Linux and runs its test, as a person would: the
-# release a plain install builds, and StackVet's main, which --HEAD builds. Run on every push and pull
+# Installs the formulas from source on a Mac and on Linux and runs their tests, as a person would: for `sv`,
+# the release a plain install builds and StackVet's main, which --HEAD builds; for `cv`, --HEAD alone until
+# StackVet v0.3.0 is released (StackVet's backlog 0694). Run on every push and pull
 # request, by hand, and weekly, since --HEAD builds whatever main is that day.
 name: test
 on:
@@ -67,4 +68,53 @@ jobs:
           brew config || true
           ls -laR "$(brew --cellar)/sv" 2>&1 | head -50 || true
           ls -la "$(brew --prefix)/bin/sv" 2>&1 || true
+          df -h || true
+  install-cv:
+    # ConfigVet's `cv`, head-only until v0.3.0: its own job, so the four `install` jobs keep the names the
+    # ruleset requires. Its two jobs, "install-cv (macos-latest)" and "install-cv (ubuntu-latest)", are required
+    # too, and check that they are, as the others do.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: This job is a required check on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHECK_RUN_ID: ${{ job.check_run_id }}
+        run: |
+          if [ -z "$CHECK_RUN_ID" ]; then
+            echo "::error::job.check_run_id is empty, so this job cannot look up its own name"
+            exit 1
+          fi
+          name="$(gh api "repos/$GITHUB_REPOSITORY/check-runs/$CHECK_RUN_ID" --jq .name)"
+          required="$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/main" \
+            --jq '.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context')"
+          echo "This job: $name"
+          echo "Required on main:"
+          echo "$required" | sed 's/^/  /'
+          if ! grep -qxF -- "$name" <<<"$required"; then
+            echo "::error::The job \"$name\" is not a required check on main, so a pull request could merge without it. Add it to the \"Protect main\" ruleset's required checks, or give the job back a name the ruleset requires."
+            exit 1
+          fi
+      - uses: Homebrew/actions/setup-homebrew@main
+      - uses: actions/checkout@v5
+      - name: Use this checkout as the tap
+        run: |
+          tap="$(brew --repository)/Library/Taps/abbyshade111/homebrew-stackvet"
+          mkdir -p "$(dirname "$tap")"
+          rm -rf "$tap"
+          ln -s "$GITHUB_WORKSPACE" "$tap"
+      - run: brew audit abbyshade111/stackvet/cv
+      - name: Install (head)
+        run: brew install --HEAD --verbose abbyshade111/stackvet/cv
+      - run: brew test abbyshade111/stackvet/cv
+      - run: cv --version
+      - name: What was installed, when anything failed
+        if: failure()
+        run: |
+          brew config || true
+          ls -laR "$(brew --cellar)/cv" 2>&1 | head -50 || true
+          ls -la "$(brew --prefix)/bin/cv" 2>&1 || true
           df -h || true
