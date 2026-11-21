@@ -38,3 +38,8 @@ says so where they are not.
 The checks in `.github/workflows/test.yml` install `sv` both ways, the release and `--HEAD`, and `cv`'s release, on a Mac
 and on Linux and run a real check with each, on every change here and once a week. Each of those six jobs first checks that `main`'s rules require it by
 its name, so a job renamed, or a system added to the matrix, fails until the ruleset requires it too.
+
+A `--HEAD` install builds StackVet's `main` as it is that minute. When a commit lands on `main` while it builds, Homebrew
+installs it under the new commit's name but then looks for the old one, and says "Empty installation" about a complete
+install. `.github/scripts/install-sv.sh` retries that one case once, and says so in the run; any other failure is not
+retried. `.github/scripts/test-install-sv.sh` checks both, with a stand-in for `brew`.
