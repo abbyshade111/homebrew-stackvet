@@ -3,12 +3,15 @@
 # Homebrew fetches Rust for the build itself, so nobody installs it by hand. The program and its data
 # folder are kept together in Homebrew's own folder for `sv` (libexec), and `bin/sv` is a link to the
 # program; `sv` follows the link back to its real place before looking for `data/` beside it
-# (StackVet's ADR-036). Until StackVet has its first release this is a head-only formula:
+# (StackVet's ADR-036). The plain install builds the latest release; --HEAD builds StackVet's main:
 #
+#     brew install abbyshade111/stackvet/sv
 #     brew install --HEAD abbyshade111/stackvet/sv
 class Sv < Formula
   desc "Checks an app against OWASP ASVS 5.0, AISVS 1.0, and the Secure by Design checklist"
   homepage "https://github.com/abbyshade111/StackVet"
+  url "https://github.com/abbyshade111/StackVet/archive/refs/tags/v0.2.0.tar.gz"
+  sha256 "a800905db54ae1e403f29dc49d7f784f99bf49eaf546a94b87596c47c04a60f0"
   license "MIT"
   head "https://github.com/abbyshade111/StackVet.git", branch: "main"
 
@@ -28,7 +31,10 @@ class Sv < Formula
 
   test do
     # The data it reports is the copy installed beside the program, not a folder it was built in.
-    assert_match "data: #{libexec}/data", shell_output("#{bin}/sv --version")
+    version_output = shell_output("#{bin}/sv --version")
+    assert_match "data: #{libexec}/data", version_output
+    # A release build says the release's version; a --HEAD build says whatever main's is.
+    assert_match "sv #{version}", version_output unless version.head?
     # A real check on a one-file app: it reads the file and says what it could not assess.
     (testpath/"app/main.py").write "print('hello')\n"
     output = shell_output("#{bin}/sv check #{testpath}/app")
