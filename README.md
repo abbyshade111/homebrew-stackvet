@@ -9,17 +9,18 @@ older or busier computer), and it needs several gigabytes of free disk space whi
 run out of application memory, free some disk space first: macOS uses free disk as extra memory.
 
 ```bash
-brew install --HEAD abbyshade111/stackvet/sv
+brew install abbyshade111/stackvet/sv
 sv --version
 ```
 
-`--HEAD` builds the latest StackVet. StackVet has no numbered release yet; when it does, `brew install
-abbyshade111/stackvet/sv` will install that, and `--HEAD` will stay for the latest code.
+That builds the latest numbered release of StackVet (0.2.0), and `sv --version` says so. To build StackVet's latest
+code from its `main` instead, add `--HEAD`: `brew install --HEAD abbyshade111/stackvet/sv`.
 
-To update later: `brew upgrade --fetch-HEAD sv`.
+To update later: `brew upgrade sv` for the next release, or `brew upgrade --fetch-HEAD sv` if you installed with
+`--HEAD`.
 
-**Windows:** Homebrew does not run on Windows, and `sv` has not yet been built or tried there. Use StackVet's
-Docker image for now (see StackVet's `docs/GETTING-STARTED.md`).
+**Windows:** Homebrew does not run on Windows. Install `sv` with Scoop instead, from the bucket
+`abbyshade111/scoop-stack-vet` (see StackVet's `docs/GETTING-STARTED.md`), or use StackVet's Docker image.
 
-The checks in `.github/workflows/test.yml` install `sv` this way on a Mac and on Linux and run a real check with
-it, on every change here and once a week.
+The checks in `.github/workflows/test.yml` install `sv` both ways, the release and `--HEAD`, on a Mac and on Linux and run a real
+check with it, on every change here and once a week.

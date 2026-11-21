@@ -1,6 +1,6 @@
-# Installs the formula from source on a Mac and on Linux and runs its test, as a person would.
-# Run on every push and pull request, by hand, and weekly, since a head-only formula builds
-# whatever StackVet's main is that day.
+# Installs the formula from source on a Mac and on Linux and runs its test, as a person would: the
+# release a plain install builds, and StackVet's main, which --HEAD builds. Run on every push and pull
+# request, by hand, and weekly, since --HEAD builds whatever main is that day.
 name: test
 on:
   push:
@@ -16,6 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
+        build: [release, head]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: Homebrew/actions/setup-homebrew@main
@@ -27,7 +28,8 @@ jobs:
           rm -rf "$tap"
           ln -s "$GITHUB_WORKSPACE" "$tap"
       - run: brew audit abbyshade111/stackvet/sv
-      - run: brew install --HEAD --verbose abbyshade111/stackvet/sv
+      - name: Install (${{ matrix.build }})
+        run: brew install ${{ matrix.build == 'head' && '--HEAD' || '' }} --verbose abbyshade111/stackvet/sv
       - run: brew test abbyshade111/stackvet/sv
       - run: sv --version
       # On 9 October 2026 one Linux run stopped with Homebrew's "Empty installation" and the rerun of the
