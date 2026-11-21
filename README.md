@@ -19,9 +19,20 @@ code from its `main` instead, add `--HEAD`: `brew install --HEAD abbyshade111/st
 To update later: `brew upgrade sv` for the next release, or `brew upgrade --fetch-HEAD sv` if you installed with
 `--HEAD`.
 
+**ConfigVet's `cv`**, StackVet's companion for an app's deployment files (Dockerfiles, compose files, Kubernetes
+manifests, and Terraform plans), is here too. Until StackVet v0.3.0 is released it builds from `main` only:
+
+```bash
+brew install --HEAD abbyshade111/stackvet/cv
+cv --version
+```
+
+`cv check` also runs hadolint, Checkov, and Trivy where they are installed (`brew install hadolint checkov trivy`), and
+says so where they are not.
+
 **Windows:** Homebrew does not run on Windows. Install `sv` with Scoop instead, from the bucket
 `abbyshade111/scoop-stack-vet` (see StackVet's `docs/GETTING-STARTED.md`), or use StackVet's Docker image.
 
-The checks in `.github/workflows/test.yml` install `sv` both ways, the release and `--HEAD`, on a Mac and on Linux and run a real
-check with it, on every change here and once a week. Each of those four jobs first checks that `main`'s rules require it by
+The checks in `.github/workflows/test.yml` install `sv` both ways, the release and `--HEAD`, and `cv` with `--HEAD`, on a Mac
+and on Linux and run a real check with each, on every change here and once a week. Each of those six jobs first checks that `main`'s rules require it by
 its name, so a job renamed, or a system added to the matrix, fails until the ruleset requires it too.
