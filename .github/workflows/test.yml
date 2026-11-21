@@ -10,6 +10,8 @@ on:
     - cron: "37 6 * * 1"
 permissions:
   contents: read
+  # To read this job's own check run, for the name the ruleset knows it by.
+  checks: read
 jobs:
   install:
     strategy:
@@ -19,6 +21,30 @@ jobs:
         build: [release, head]
     runs-on: ${{ matrix.os }}
     steps:
+      # The "Protect main" ruleset requires each install job by its full name, matrix values included, such as
+      # "install (macos-latest, head)". A job renamed, or a value added to the matrix, would not be required, and a
+      # formula that fails there could still merge. So each job reads its own name from its check run (a name built
+      # here from the matrix would miss a new matrix key) and fails when the rules for main do not require it.
+      # What this misses: a job removed from here stays required and never reports, so pull requests wait on it.
+      - name: This job is a required check on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHECK_RUN_ID: ${{ job.check_run_id }}
+        run: |
+          if [ -z "$CHECK_RUN_ID" ]; then
+            echo "::error::job.check_run_id is empty, so this job cannot look up its own name"
+            exit 1
+          fi
+          name="$(gh api "repos/$GITHUB_REPOSITORY/check-runs/$CHECK_RUN_ID" --jq .name)"
+          required="$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/main" \
+            --jq '.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context')"
+          echo "This job: $name"
+          echo "Required on main:"
+          echo "$required" | sed 's/^/  /'
+          if ! grep -qxF -- "$name" <<<"$required"; then
+            echo "::error::The job \"$name\" is not a required check on main, so a pull request could merge without it. Add it to the \"Protect main\" ruleset's required checks, or give the job back a name the ruleset requires."
+            exit 1
+          fi
       - uses: Homebrew/actions/setup-homebrew@main
       - uses: actions/checkout@v5
       - name: Use this checkout as the tap
