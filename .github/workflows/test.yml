@@ -55,13 +55,18 @@ jobs:
           rm -rf "$tap"
           ln -s "$GITHUB_WORKSPACE" "$tap"
       - run: brew audit abbyshade111/stackvet/sv
+      # A --HEAD install that Homebrew calls an "Empty installation" because StackVet's main moved while it built is
+      # retried once, saying so; nothing else is (StackVet backlog 0697; the script says why). Its tests run first.
+      - name: The install script's own tests
+        run: .github/scripts/test-install-sv.sh
       - name: Install (${{ matrix.build }})
-        run: brew install ${{ matrix.build == 'head' && '--HEAD' || '' }} --verbose abbyshade111/stackvet/sv
+        run: .github/scripts/install-sv.sh ${{ matrix.build }}
       - run: brew test abbyshade111/stackvet/sv
       - run: sv --version
       # On 9 October 2026 one Linux run stopped with Homebrew's "Empty installation" and the rerun of the
-      # same commit passed; the log could not be read where it was looked at. If it comes back, this shows
-      # what was installed, where Homebrew built, and how it is set up.
+      # same commit passed; the log could not be read where it was looked at. This step's listing on 21 November
+      # showed why (StackVet backlog 0697). If anything else fails, it shows what was installed, where Homebrew
+      # built, and how it is set up.
       - name: What was installed, when anything failed
         if: failure()
         run: |
