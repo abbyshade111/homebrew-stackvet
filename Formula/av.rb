@@ -25,6 +25,10 @@ class Av < Formula
   depends_on "rust" => :build
 
   def install
+    # The release's source archive has no `.git`, so the build is told the commit it was tagged at, which
+    # `av --version` names (StackVet's backlog 0730). Changed with `url` and `sha256` at each release; a --HEAD
+    # build has a checkout and names its own.
+    ENV["SV_GIT_COMMIT"] = "dccc4fef478e9b3c6cb550d9194ce5446e047ac7" unless build.head?
     # --locked and --jobs 2, as `sv`'s formula says why: the versions StackVet's tests ran with, and two crates at a
     # time, since `av` builds `sv-check` and its tree-sitter grammars too.
     system "cargo", "build", "--release", "--locked", "--jobs", "2", "-p", "av-cli"
@@ -38,6 +42,7 @@ class Av < Formula
     version_output = shell_output("#{bin}/av --version")
     assert_match(/^av \d+\.\d+\.\d+/, version_output)
     assert_match "av #{version}", version_output unless version.head?
+    assert_match "(commit dccc4fef478e9b3c6cb550d9194ce5446e047ac7)", version_output unless version.head?
     # Its records are kept in the test's own folder, never the person's.
     ENV["XDG_STATE_HOME"] = (testpath/"state").to_s
     ENV["XDG_CONFIG_HOME"] = (testpath/"config").to_s

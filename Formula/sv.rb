@@ -18,6 +18,10 @@ class Sv < Formula
   depends_on "rust" => :build
 
   def install
+    # The release's source archive has no `.git`, so the build is told the commit it was tagged at, which
+    # `sv --version` names (StackVet's backlog 0730). Changed with `url` and `sha256` at each release; a --HEAD
+    # build has a checkout and names its own.
+    ENV["SV_GIT_COMMIT"] = "dccc4fef478e9b3c6cb550d9194ce5446e047ac7" unless build.head?
     # --locked: the versions in Cargo.lock, the ones StackVet's tests ran with.
     # --jobs 2: two crates compiled at a time rather than one per core. The build includes sixteen
     # tree-sitter grammars written in C, and compiling them all at once took more memory than a Mac with
@@ -35,6 +39,7 @@ class Sv < Formula
     assert_match "data: #{libexec}/data", version_output
     # A release build says the release's version; a --HEAD build says whatever main's is.
     assert_match "sv #{version}", version_output unless version.head?
+    assert_match "(commit dccc4fef478e9b3c6cb550d9194ce5446e047ac7)", version_output unless version.head?
     # A real check on a one-file app: it reads the file and says what it could not assess.
     (testpath/"app/main.py").write "print('hello')\n"
     output = shell_output("#{bin}/sv check #{testpath}/app")
