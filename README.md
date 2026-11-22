@@ -13,7 +13,7 @@ brew install abbyshade111/stackvet/sv
 sv --version
 ```
 
-That builds the latest numbered release of StackVet (0.3.0), and `sv --version` says so. To build StackVet's latest
+That builds the latest numbered release of StackVet (0.3.1), and `sv --version` says so. To build StackVet's latest
 code from its `main` instead, add `--HEAD`: `brew install --HEAD abbyshade111/stackvet/sv`.
 
 To update later: `brew upgrade sv` for the next release, or `brew upgrade --fetch-HEAD sv` if you installed with
@@ -32,11 +32,21 @@ cv --version
 `cv check` also runs hadolint, Checkov, and Trivy where they are installed (`brew install hadolint checkov trivy`), and
 says so where they are not.
 
-**Windows:** Homebrew does not run on Windows. Install `sv` with Scoop instead, from the bucket
+**AgentVet's `av`**, StackVet's companion that says what the records show an AI coding tool did while it built an
+app, and what it could not see, is here too, from StackVet v0.3.1:
+
+```bash
+brew install abbyshade111/stackvet/av
+av --version
+```
+
+`--HEAD` builds it from `main` instead.
+
+**Windows:** Homebrew does not run on Windows. Install `sv`, `cv`, and `av` with Scoop instead, from the bucket
 `abbyshade111/scoop-stack-vet` (see StackVet's `docs/GETTING-STARTED.md`), or use StackVet's Docker image.
 
-The checks in `.github/workflows/test.yml` install `sv` both ways, the release and `--HEAD`, and `cv`'s release, on a Mac
-and on Linux and run a real check with each, on every change here and once a week. Each of those six jobs first checks that `main`'s rules require it by
+The checks in `.github/workflows/test.yml` install `sv` both ways, the release and `--HEAD`, and `cv`'s and `av`'s releases, on a Mac
+and on Linux and run a real check with each, on every change here and once a week. Each of those eight jobs first checks that `main`'s rules require it by
 its name, so a job renamed, or a system added to the matrix, fails until the ruleset requires it too.
 
 A `--HEAD` install builds StackVet's `main` as it is that minute. When a commit lands on `main` while it builds, Homebrew

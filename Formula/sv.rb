@@ -10,8 +10,8 @@
 class Sv < Formula
   desc "Checks an app against OWASP ASVS 5.0, AISVS 1.0, and the Secure by Design checklist"
   homepage "https://github.com/abbyshade111/StackVet"
-  url "https://github.com/abbyshade111/StackVet/archive/refs/tags/v0.3.0.tar.gz"
-  sha256 "015d4c401adba8f12a7d92163f28af11bdd401edf7f84e44c2aff3a7752e8b12"
+  url "https://github.com/abbyshade111/StackVet/archive/refs/tags/v0.3.1.tar.gz"
+  sha256 "acecaa2ea89c76438cef20a9f304abd117c15d475078e06e8335df7c57f1688b"
   license "MIT"
   head "https://github.com/abbyshade111/StackVet.git", branch: "main"
 
